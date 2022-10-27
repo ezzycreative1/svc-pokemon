@@ -3,7 +3,9 @@ package mid
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/ezzycreative1/svc-pokemon/pkg/convert"
 	"github.com/golang-jwt/jwt"
@@ -94,4 +96,16 @@ func JwtMiddleware(mayangSecretKey string) echo.MiddlewareFunc {
 		}
 
 	}
+}
+
+// GenerateToken ..
+func GenerateToken(email, userid, role string) (string, error) {
+	claims := jwt.MapClaims{}
+	claims["authorized"] = true
+	claims["user_id"] = userid
+	claims["role"] = role
+	claims["exp"] = time.Now().Add(10 * time.Minute)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(os.Getenv("API_SECRET")))
+
 }

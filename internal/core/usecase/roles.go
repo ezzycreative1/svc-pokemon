@@ -8,6 +8,8 @@ import (
 	"github.com/ezzycreative1/svc-pokemon/internal/core/ports"
 )
 
+const seq = 1
+
 type rolesUseCase struct {
 	Repo ports.IRolesRepository
 }
@@ -23,6 +25,7 @@ func (ru *rolesUseCase) FetchRoles(ctx context.Context) ([]domain.Roles, error) 
 	if err != nil {
 		return nil, err
 	}
+
 	return res, nil
 }
 
@@ -34,13 +37,32 @@ func (ru *rolesUseCase) GetRoleByID(ctx context.Context, id int64) (*domain.Role
 	return res, nil
 }
 
-func (ru *rolesUseCase) UpdateRole(ctx context.Context, input *domain.Roles) error {
-	input.UpdatedAt = time.Now()
-	return ru.Repo.UpdateRole(ctx, input)
+func (ru *rolesUseCase) UpdateRole(ctx context.Context, id int64, input *domain.RoleRequest) error {
+	dataRole, err := ru.Repo.GetRoleByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	data := domain.Roles{
+		ID:        dataRole.ID,
+		Name:      input.Name,
+		Status:    dataRole.Status,
+		CreatedAt: dataRole.CreatedAt,
+		UpdatedAt: time.Now(),
+	}
+
+	return ru.Repo.UpdateRole(ctx, &data)
 }
 
-func (ru *rolesUseCase) StoreRole(ctx context.Context, input *domain.Roles) error {
-	err := ru.Repo.StoreRole(ctx, input)
+func (ru *rolesUseCase) StoreRole(ctx context.Context, input *domain.RoleRequest) error {
+	data := domain.Roles{
+		Name:      input.Name,
+		Status:    1,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	err := ru.Repo.StoreRole(ctx, &data)
 	if err != nil {
 		return err
 	}
@@ -49,5 +71,9 @@ func (ru *rolesUseCase) StoreRole(ctx context.Context, input *domain.Roles) erro
 }
 
 func (ru *rolesUseCase) DeleteRole(ctx context.Context, id int64) error {
-	return ru.Repo.DeleteRole(ctx, id)
+	data, err := ru.Repo.GetRoleByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	return ru.Repo.DeleteRole(ctx, data.ID)
 }

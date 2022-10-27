@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -78,19 +79,20 @@ func (ch *PokemonHandler) StoreRole(ctx echo.Context) (err error) {
 	requestID := mid.GetID(ctx)
 	userCtx := mid.SetIDx(ctx.Request().Context(), requestID)
 
-	var payloads domain.Roles
-	if err := ctx.Bind(&payloads); err != nil {
-		ch.Logger.ErrorT(requestID, "cake store payload", err, mlog.Any("payload", payloads))
+	var payload domain.RoleRequest
+	fmt.Println(payload)
+	if err := ctx.Bind(&payload); err != nil {
+		ch.Logger.ErrorT(requestID, "role store payload", err, mlog.Any("payload", payload))
 		return web.ResponseFormatter(ctx, http.StatusBadRequest, "Bad Request", nil, err)
 	}
 
-	mapErr, err := ch.Validator.SliceStruct(payloads)
+	mapErr, err := ch.Validator.Struct(payload)
 	if err != nil {
 		ch.Logger.ErrorT(requestID, "Bad Request", err)
 		return web.ResponseErrValidation(ctx, "bad request", mapErr)
 	}
 
-	err = ch.UseCaseRoles.StoreRole(userCtx, &payloads)
+	err = ch.UseCaseRoles.StoreRole(userCtx, &payload)
 	if err != nil {
 		ch.Logger.ErrorT(requestID, "error store data", err)
 		return web.ResponseFormatter(ctx, http.StatusBadRequest, err.Error(), nil, err)
@@ -103,19 +105,27 @@ func (ch *PokemonHandler) UpdateRole(ctx echo.Context) (err error) {
 	requestID := mid.GetID(ctx)
 	userCtx := mid.SetIDx(ctx.Request().Context(), requestID)
 
-	var payloads domain.Roles
-	if err := ctx.Bind(&payloads); err != nil {
-		ch.Logger.ErrorT(requestID, "role store payload", err, mlog.Any("payload", payloads))
+	idP, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ch.Logger.ErrorT(requestID, "error get data", err)
+		return web.ResponseFormatter(ctx, http.StatusNotFound, err.Error(), nil, err)
+	}
+
+	id := int64(idP)
+
+	var payload domain.RoleRequest
+	if err := ctx.Bind(&payload); err != nil {
+		ch.Logger.ErrorT(requestID, "role store payload", err, mlog.Any("payload", payload))
 		return web.ResponseFormatter(ctx, http.StatusBadRequest, "Bad Request", nil, err)
 	}
 
-	mapErr, err := ch.Validator.SliceStruct(payloads)
+	mapErr, err := ch.Validator.Struct(payload)
 	if err != nil {
 		ch.Logger.ErrorT(requestID, "Bad Request", err)
 		return web.ResponseErrValidation(ctx, "bad request", mapErr)
 	}
 
-	err = ch.UseCaseRoles.UpdateRole(userCtx, &payloads)
+	err = ch.UseCaseRoles.UpdateRole(userCtx, id, &payload)
 	if err != nil {
 		ch.Logger.ErrorT(requestID, "error update data", err)
 		return web.ResponseFormatter(ctx, http.StatusBadRequest, err.Error(), nil, err)
@@ -146,6 +156,11 @@ func (ch *PokemonHandler) DeleteRole(c echo.Context) error {
 }
 
 //Handler User
+func (ch *PokemonHandler) Login(c echo.Context) error {
+
+	return web.ResponseFormatter(c, http.StatusNoContent, "success", "", nil)
+}
+
 func (ch *PokemonHandler) FetchUsers(ctx echo.Context) error {
 	requestID := mid.GetID(ctx)
 	userCtx := mid.SetIDx(ctx.Request().Context(), requestID)
@@ -184,19 +199,19 @@ func (ch *PokemonHandler) StoreUser(ctx echo.Context) (err error) {
 	requestID := mid.GetID(ctx)
 	userCtx := mid.SetIDx(ctx.Request().Context(), requestID)
 
-	var payloads domain.Users
-	if err := ctx.Bind(&payloads); err != nil {
-		ch.Logger.ErrorT(requestID, "user store payload", err, mlog.Any("payload", payloads))
+	var payload domain.Users
+	if err := ctx.Bind(&payload); err != nil {
+		ch.Logger.ErrorT(requestID, "user store payload", err, mlog.Any("payload", payload))
 		return web.ResponseFormatter(ctx, http.StatusBadRequest, "Bad Request", nil, err)
 	}
 
-	mapErr, err := ch.Validator.SliceStruct(payloads)
+	mapErr, err := ch.Validator.Struct(payload)
 	if err != nil {
 		ch.Logger.ErrorT(requestID, "Bad Request", err)
 		return web.ResponseErrValidation(ctx, "bad request", mapErr)
 	}
 
-	err = ch.UseCaseUsers.StoreUser(userCtx, &payloads)
+	err = ch.UseCaseUsers.StoreUser(userCtx, &payload)
 	if err != nil {
 		ch.Logger.ErrorT(requestID, "error store data", err)
 		return web.ResponseFormatter(ctx, http.StatusBadRequest, err.Error(), nil, err)
@@ -209,19 +224,27 @@ func (ch *PokemonHandler) UpdateUser(ctx echo.Context) (err error) {
 	requestID := mid.GetID(ctx)
 	userCtx := mid.SetIDx(ctx.Request().Context(), requestID)
 
+	idP, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ch.Logger.ErrorT(requestID, "error get data", err)
+		return web.ResponseFormatter(ctx, http.StatusNotFound, err.Error(), nil, err)
+	}
+
+	id := int64(idP)
+
 	var payloads domain.Users
 	if err := ctx.Bind(&payloads); err != nil {
 		ch.Logger.ErrorT(requestID, "user update payload", err, mlog.Any("payload", payloads))
 		return web.ResponseFormatter(ctx, http.StatusBadRequest, "Bad Request", nil, err)
 	}
 
-	mapErr, err := ch.Validator.SliceStruct(payloads)
+	mapErr, err := ch.Validator.Struct(payloads)
 	if err != nil {
 		ch.Logger.ErrorT(requestID, "Bad Request", err)
 		return web.ResponseErrValidation(ctx, "bad request", mapErr)
 	}
 
-	err = ch.UseCaseUsers.UpdateUser(userCtx, &payloads)
+	err = ch.UseCaseUsers.UpdateUser(userCtx, id, &payloads)
 	if err != nil {
 		ch.Logger.ErrorT(requestID, "error update data", err)
 		return web.ResponseFormatter(ctx, http.StatusBadRequest, err.Error(), nil, err)

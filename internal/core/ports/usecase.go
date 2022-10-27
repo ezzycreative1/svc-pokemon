@@ -6,18 +6,23 @@ import (
 	"github.com/ezzycreative1/svc-pokemon/internal/core/domain"
 )
 
+type IAuthUsecase interface {
+	TokenValidate(ctx context.Context) error
+	ExtractToken(ctx context.Context) (string, error)
+}
+
 type IRolesUsecase interface {
 	FetchRoles(ctx context.Context) ([]domain.Roles, error)
 	GetRoleByID(ctx context.Context, id int64) (*domain.Roles, error)
-	UpdateRole(ctx context.Context, input *domain.Roles) error
-	StoreRole(context.Context, *domain.Roles) error
+	UpdateRole(ctx context.Context, id int64, input *domain.RoleRequest) error
+	StoreRole(context.Context, *domain.RoleRequest) error
 	DeleteRole(ctx context.Context, id int64) error
 }
 
 type IUsersUsecase interface {
 	FetchUsers(ctx context.Context) ([]domain.Users, error)
 	GetUserByID(ctx context.Context, id int64) (*domain.Users, error)
-	UpdateUser(ctx context.Context, input *domain.Users) error
+	UpdateUser(ctx context.Context, id int64, input *domain.Users) error
 	StoreUser(context.Context, *domain.Users) error
 	DeleteUser(ctx context.Context, id int64) error
 }
