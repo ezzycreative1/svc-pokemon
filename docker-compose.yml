@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  database:
+    container_name: mysql-pokemon
+    image: mysql:8
+    ports:
+      - 3306:3306
+    volumes:
+      - ~/apps/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=S3cret
+      - MYSQL_PASSWORD=An0thrS3crt
+      - MYSQL_USER=citizix_user
+      - MYSQL_DATABASE=citizix_db
+    restart: on-failure
+    networks:
+      - local_network
+
+  webservice:
+    container_name: webservice
+    build: .
+    ports:
+      - 8000:8000
+    restart: on-failure
+    networks:
+      - local_network
+    depends_on:
+      - database
+    
+networks:
+  local_network:
+    name: local_network
