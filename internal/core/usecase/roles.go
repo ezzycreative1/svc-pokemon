@@ -77,3 +77,22 @@ func (ru *rolesUseCase) DeleteRole(ctx context.Context, id int64) error {
 	}
 	return ru.Repo.DeleteRole(ctx, data.ID)
 }
+
+func getRoleName(id int64) string {
+	var roleName string
+	switch id {
+	case 1:
+		roleName = "Bos"
+	case 2:
+		roleName = "Admin"
+	case 3:
+		roleName = "Operasional"
+	case 4:
+		roleName = "BlackDealer"
+	}
+	return roleName
+}
+
+func (ru *rolesUseCase) GetRoleID(ctx context.Context, name string) (int64, error) {
+	return ru.Repo.GetRoleID(ctx, name)
+}

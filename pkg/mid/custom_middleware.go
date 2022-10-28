@@ -11,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func ApiKeyMiddleware(apiKey string) echo.MiddlewareFunc {
@@ -99,13 +100,21 @@ func JwtMiddleware(mayangSecretKey string) echo.MiddlewareFunc {
 }
 
 // GenerateToken ..
-func GenerateToken(email, userid, role string) (string, error) {
+func GenerateToken(email string, userid int64) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["user_id"] = userid
-	claims["role"] = role
 	claims["exp"] = time.Now().Add(10 * time.Minute)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
+}
 
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }

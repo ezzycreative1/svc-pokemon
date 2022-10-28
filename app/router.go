@@ -52,4 +52,5 @@ func LoadRoute(app *app) {
 	g.PUT("/user/:id", pokemonHandler.UpdateUser)
 	g.GET("/user/:id", pokemonHandler.GetUserByID)
 	g.DELETE("/user/:id", pokemonHandler.DeleteUser)
+	g.POST("/user/login", pokemonHandler.Login)
 }

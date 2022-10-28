@@ -12,6 +12,7 @@ type IRolesRepository interface {
 	UpdateRole(ctx context.Context, input *domain.Roles) error
 	StoreRole(ctx context.Context, input *domain.Roles) error
 	DeleteRole(ctx context.Context, id int64) error
+	GetRoleID(ctx context.Context, name string) (int64, error)
 }
 
 type IUsersRepository interface {
@@ -20,6 +21,7 @@ type IUsersRepository interface {
 	UpdateUser(ctx context.Context, input *domain.Users) error
 	StoreUser(ctx context.Context, input *domain.Users) error
 	DeleteUser(ctx context.Context, id int64) error
+	GetUserByEmail(ctx context.Context, email string) (*domain.Users, error)
 }
 
 type IPokemonsRepository interface {

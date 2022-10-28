@@ -122,3 +122,30 @@ func (cr *mysqlUsersRepo) UpdateUser(ctx context.Context, input *domain.Users) e
 
 	return nil
 }
+
+func (cr *mysqlUsersRepo) GetUserByEmail(ctx context.Context, email string) (*domain.Users, error) {
+	trx, ok := ctx.Value(KeyTrans).(*gorm.DB)
+	if !ok {
+		trx = cr.DB
+	}
+
+	ctxWT, cancel := context.WithTimeout(ctx, connTimeout*time.Second)
+	defer cancel()
+
+	var result domain.Users
+	query := trx.WithContext(ctxWT).
+		Where("email = ?", email).
+		Limit(1).
+		Find(&result)
+
+	if query.Error != nil {
+		return nil, query.Error
+	}
+
+	if result.ID == 0 {
+		return nil, errs.ErrNotFound
+	}
+
+	return &result, nil
+
+}

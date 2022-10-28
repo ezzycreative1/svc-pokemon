@@ -156,9 +156,29 @@ func (ch *PokemonHandler) DeleteRole(c echo.Context) error {
 }
 
 //Handler User
-func (ch *PokemonHandler) Login(c echo.Context) error {
+func (ch *PokemonHandler) Login(ctx echo.Context) error {
+	requestID := mid.GetID(ctx)
+	userCtx := mid.SetIDx(ctx.Request().Context(), requestID)
 
-	return web.ResponseFormatter(c, http.StatusNoContent, "success", "", nil)
+	var payload domain.LoginRequest
+	if err := ctx.Bind(&payload); err != nil {
+		ch.Logger.ErrorT(requestID, "login user payload", err, mlog.Any("payload", payload))
+		return web.ResponseFormatter(ctx, http.StatusBadRequest, "Bad Request", nil, err)
+	}
+
+	mapErr, err := ch.Validator.Struct(payload)
+	if err != nil {
+		ch.Logger.ErrorT(requestID, "Bad Request", err)
+		return web.ResponseErrValidation(ctx, "bad request", mapErr)
+	}
+
+	data, err := ch.UseCaseUsers.LoginUser(userCtx, &payload)
+	if err != nil {
+		ch.Logger.ErrorT(requestID, "error store data", err)
+		return web.ResponseFormatter(ctx, http.StatusBadRequest, err.Error(), nil, err)
+	}
+
+	return web.ResponseFormatter(ctx, http.StatusOK, "Success", data, nil)
 }
 
 func (ch *PokemonHandler) FetchUsers(ctx echo.Context) error {
@@ -199,7 +219,7 @@ func (ch *PokemonHandler) StoreUser(ctx echo.Context) (err error) {
 	requestID := mid.GetID(ctx)
 	userCtx := mid.SetIDx(ctx.Request().Context(), requestID)
 
-	var payload domain.Users
+	var payload domain.StoreUserRequest
 	if err := ctx.Bind(&payload); err != nil {
 		ch.Logger.ErrorT(requestID, "user store payload", err, mlog.Any("payload", payload))
 		return web.ResponseFormatter(ctx, http.StatusBadRequest, "Bad Request", nil, err)

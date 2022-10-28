@@ -122,3 +122,27 @@ func (cr *mysqlRolesRepo) UpdateRole(ctx context.Context, input *domain.Roles) e
 
 	return nil
 }
+
+func (cr *mysqlRolesRepo) GetRoleID(ctx context.Context, name string) (int64, error) {
+	trx, ok := ctx.Value(KeyTransaction).(*gorm.DB)
+	if !ok {
+		trx = cr.DB
+	}
+
+	ctxWT, cancel := context.WithTimeout(ctx, connectTimeout*time.Second)
+	defer cancel()
+
+	var result domain.Roles
+	query := trx.WithContext(ctxWT).
+		Select("id").
+		Where("name = ?", name).
+		Limit(1).
+		Find(&result)
+
+	if query.Error != nil {
+		return 0, query.Error
+	}
+
+	return result.ID, nil
+
+}

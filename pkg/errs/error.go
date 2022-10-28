@@ -8,4 +8,6 @@ var (
 	ErrConflict            = errors.New("your data already exist")
 	ErrBadParamInput       = errors.New("given Param is not valid")
 	ErrDuplicate           = errors.New("duplicated entry")
+	ErrEmailWrong          = errors.New("format email wrong")
+	ErrGenerateToken       = errors.New("generate token failed")
 )
