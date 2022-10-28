@@ -39,3 +39,7 @@ type IBattleRepository interface {
 	StorePokemon(ctx context.Context, input *domain.Pokemons) error
 	DeletePokemon(ctx context.Context, id int64) error
 }
+
+type IAuthRepository interface {
+	CreateAuth(ctx context.Context, userid int64, td *domain.TokenDetails) error
+}

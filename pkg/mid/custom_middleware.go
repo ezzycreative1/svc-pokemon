@@ -1,13 +1,15 @@
 package mid
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/ezzycreative1/svc-pokemon/pkg/convert"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -39,74 +41,80 @@ type UserAuth struct {
 	Id int64
 }
 
-// Custom JWT middleware
-func JwtMiddleware(mayangSecretKey string) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(ctx echo.Context) error {
-			// Get token from header
-			authorizationHeader := ctx.Request().Header.Get("Authorization")
-
-			// Check if string has token
-			if !strings.Contains(authorizationHeader, "Bearer") {
-				response := map[string]interface{}{
-					"message": "Bad request",
-					"data":    nil,
-					"error":   "invalid token or missing token",
-				}
-				return ctx.JSON(http.StatusBadRequest, response)
-			}
-
-			// Split token string
-			tokenString := strings.Replace(authorizationHeader, "Bearer ", "", -1)
-
-			// Parse token
-			token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-				if method, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-					return nil, fmt.Errorf("signing method invalid")
-				} else if method != jwt.SigningMethodHS256 {
-					return nil, fmt.Errorf("signing method invalid")
-				}
-
-				return []byte(mayangSecretKey), nil
-			})
-
-			// Check if there is error
-			if err != nil {
-				response := map[string]interface{}{
-					"message": "Bad request",
-					"data":    nil,
-					"error":   err.Error(),
-				}
-				return ctx.JSON(http.StatusBadRequest, response)
-			}
-
-			// Save user_id and branch_id to context
-			claims := token.Claims.(jwt.MapClaims)
-			user_id := fmt.Sprintf("%v", claims["id"])
-
-			// Set data to struct
-			UserAuthData := UserAuth{
-				Id: convert.StrToInt64(user_id, 0),
-			}
-
-			// Set to Context
-			ctx.Set("UserAuth", &UserAuthData)
-
-			// Skip to router
-			return next(ctx)
-		}
-
-	}
-}
-
 // GenerateToken ..
 func GenerateToken(email string, userid int64) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
 	claims["user_id"] = userid
-	claims["exp"] = time.Now().Add(10 * time.Minute)
+	claims["exp"] = time.Now().Add(72 * time.Hour).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
+}
+
+// TokenValid ..
+func TokenValid(c echo.Context) error {
+	tokenString := ExtractToken(c)
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(os.Getenv("API_SECRET")), nil
+	})
+	if err != nil {
+		return err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		Pretty(claims)
+	}
+	return nil
+}
+
+// ExtractToken ..
+func ExtractToken(c echo.Context) string {
+	keys := c.Request().URL.Query()
+	token := keys.Get("token")
+	if token != "" {
+		return token
+	}
+	bearerToken := c.Request().Header.Get("Authorization")
+	if len(strings.Split(bearerToken, " ")) == 2 {
+		return strings.Split(bearerToken, " ")[1]
+	}
+	return ""
+}
+
+// ExtractTokenID ..
+func ExtractTokenID(c echo.Context) (int64, error) {
+
+	tokenString := ExtractToken(c)
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(os.Getenv("API_SECRET")), nil
+	})
+	if err != nil {
+		return 0, err
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		uid, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["user_id"]), 10, 64)
+		if err != nil {
+			return 0, err
+		}
+		return int64(uid), nil
+	}
+	return 0, nil
+}
+
+//Pretty display the claims
+func Pretty(data interface{}) {
+	b, err := json.MarshalIndent(data, "", " ")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(b))
 }
 
 func HashPassword(password string) (string, error) {
