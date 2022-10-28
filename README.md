@@ -61,4 +61,4 @@ data yang sifatnya referensi belum tersedia untuk fitur tsb. Untuk memenuhi data
 # Menggunakan REST API
 Kami menyiapkan dokumentasi penggunaan REST API dalam bentuk koleksi Postman yang sudah siap digunakan
 , sebelum itu pastikan Anda sudah meng-install [Postman](https://www.postman.com/downloads/). Untuk file koleksi
-postman dapat di lihat di [postman_collection.json](postman_collection.json).
+postman dapat di lihat di [postman_collection.json](pokemon.postman_collection.json).
