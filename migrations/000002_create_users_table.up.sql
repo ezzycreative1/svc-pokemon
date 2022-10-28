@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `Users` (
 `role_id` bigint NOT NULL,
 `name`varchar(100) NOT NULL DEFAULT 0,
 `email` varchar(100) NOT NULL,
-`password` varchar(20) NULL,
+`password` varchar(100) NULL,
 `status` tinyint NOT NULL DEFAULT 0,
 `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

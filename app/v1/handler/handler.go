@@ -252,7 +252,7 @@ func (ch *PokemonHandler) UpdateUser(ctx echo.Context) (err error) {
 
 	id := int64(idP)
 
-	var payloads domain.Users
+	var payloads domain.UpdateUserRequest
 	if err := ctx.Bind(&payloads); err != nil {
 		ch.Logger.ErrorT(requestID, "user update payload", err, mlog.Any("payload", payloads))
 		return web.ResponseFormatter(ctx, http.StatusBadRequest, "Bad Request", nil, err)

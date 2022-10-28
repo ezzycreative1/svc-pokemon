@@ -51,23 +51,42 @@ func (ru *userUseCase) LoginUser(ctx context.Context, input *domain.LoginRequest
 	return res, nil
 }
 
-func (ru *userUseCase) FetchUsers(ctx context.Context) ([]domain.Users, error) {
-	res, err := ru.Repo.FetchUsers(ctx)
+func (ru *userUseCase) FetchUsers(ctx context.Context) ([]domain.UserResponse, error) {
+	listUser, err := ru.Repo.FetchUsers(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	var res []domain.UserResponse
+	for _, user := range listUser {
+		res = append(res, domain.UserResponse{
+			ID:     user.ID,
+			Name:   user.Name,
+			Email:  user.Email,
+			Status: user.Status,
+		})
 	}
 	return res, nil
 }
 
-func (ru *userUseCase) GetUserByID(ctx context.Context, id int64) (*domain.Users, error) {
-	res, err := ru.Repo.GetUserByID(ctx, id)
+func (ru *userUseCase) GetUserByID(ctx context.Context, id int64) (*domain.SingleUserResponse, error) {
+	dataUser, err := ru.Repo.GetUserByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return res, nil
+	res := domain.SingleUserResponse{
+		ID:        dataUser.ID,
+		Role:      dataUser.RoleID,
+		Name:      dataUser.Name,
+		Email:     dataUser.Email,
+		Status:    dataUser.Status,
+		CreatedAt: dataUser.CreatedAt,
+		UpdatedAt: dataUser.UpdatedAt,
+	}
+	return &res, nil
 }
 
-func (ru *userUseCase) UpdateUser(ctx context.Context, id int64, input *domain.Users) error {
+func (ru *userUseCase) UpdateUser(ctx context.Context, id int64, input *domain.UpdateUserRequest) error {
 	dataUser, err := ru.Repo.GetUserByID(ctx, id)
 	if err != nil {
 		return err
@@ -75,8 +94,8 @@ func (ru *userUseCase) UpdateUser(ctx context.Context, id int64, input *domain.U
 
 	data := domain.Users{
 		ID:        dataUser.ID,
-		RoleID:    dataUser.RoleID,
-		Name:      input.Name,
+		RoleID:    input.Role,
+		Name:      input.Fullname,
 		Email:     input.Email,
 		Password:  dataUser.Password,
 		Status:    dataUser.Status,
@@ -89,13 +108,6 @@ func (ru *userUseCase) UpdateUser(ctx context.Context, id int64, input *domain.U
 
 func (ru *userUseCase) StoreUser(ctx context.Context, input *domain.StoreUserRequest) error {
 	password, _ := mid.HashPassword(input.Password)
-
-	checkUser, err := ru.Repo.GetUserByEmail(ctx, input.Email)
-	if err != nil {
-		if checkUser.Email == "" {
-			return errs.ErrBadParamInput
-		}
-	}
 
 	data := domain.Users{
 		RoleID:    input.Role,

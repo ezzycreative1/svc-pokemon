@@ -20,9 +20,9 @@ type IRolesUsecase interface {
 }
 
 type IUsersUsecase interface {
-	FetchUsers(ctx context.Context) ([]domain.Users, error)
-	GetUserByID(ctx context.Context, id int64) (*domain.Users, error)
-	UpdateUser(ctx context.Context, id int64, input *domain.Users) error
+	FetchUsers(ctx context.Context) ([]domain.UserResponse, error)
+	GetUserByID(ctx context.Context, id int64) (*domain.SingleUserResponse, error)
+	UpdateUser(ctx context.Context, id int64, input *domain.UpdateUserRequest) error
 	StoreUser(context.Context, *domain.StoreUserRequest) error
 	DeleteUser(ctx context.Context, id int64) error
 	LoginUser(context.Context, *domain.LoginRequest) (*domain.LoginResponse, error)
