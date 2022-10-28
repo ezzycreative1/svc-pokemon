@@ -30,10 +30,10 @@ type IUsersUsecase interface {
 
 type IPokemonsUsecase interface {
 	FetchPokemons(ctx context.Context) ([]domain.Pokemons, error)
-	GetPokemonByID(ctx context.Context, id int64) (*domain.Pokemons, error)
-	UpdatePokemon(ctx context.Context, input *domain.Pokemons) error
-	StorePokemon(context.Context, *domain.Pokemons) error
-	DeletePokemon(ctx context.Context, id int64) error
+	// GetPokemonByID(ctx context.Context, id int64) (*domain.Pokemons, error)
+	// UpdatePokemon(ctx context.Context, input *domain.Pokemons) error
+	StorePokemon(context.Context, *domain.StorePokemonRequest) error
+	// DeletePokemon(ctx context.Context, id int64) error
 }
 
 type IBattlesUsecase interface {

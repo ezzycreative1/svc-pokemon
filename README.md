@@ -4,7 +4,7 @@ REST API cake store sederhana yang dirancang dengan Arsitektur Heksagonal (Pola 
 
 ![golang clean architecture](https://github.com/ezzycreative1/svc-pokemon/raw/main/hexaarch.png)
 # Fitur REST API
-- Create, Read, Update dan Delete Cake
+- Create, Read, Update dan Delete Pokemon Battle Royale
 
 # Teknologi dan Framework
 - Golang

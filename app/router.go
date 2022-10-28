@@ -15,16 +15,21 @@ func LoadRoute(app *app) {
 	// init dependency
 	roleRepos := mysql.NewMysqlRolesRepo(app.database)
 	userRepos := mysql.NewMysqlUserRepo(app.database)
+	pokeRepos := mysql.NewMysqlPokemonRepo(app.database)
 	roleUCase := usecase.NewRolesUsecase(
 		&roleRepos,
 	)
 	userUCase := usecase.NewUserUsecase(
 		&userRepos,
 	)
+	pokemonUCase := usecase.NewPokemonUsecase(
+		&pokeRepos,
+	)
 	// create handler
 	pokemonHandler := handler.NewPokemonHandler(
 		&roleUCase,
 		&userUCase,
+		&pokemonUCase,
 		app.validator,
 		app.logger,
 		*app.cfg,
@@ -53,4 +58,7 @@ func LoadRoute(app *app) {
 	g.GET("/user/:id", pokemonHandler.GetUserByID)
 	g.DELETE("/user/:id", pokemonHandler.DeleteUser)
 	g.POST("/user/login", pokemonHandler.Login)
+
+	g.GET("/list", pokemonHandler.FetchPokemons)
+	g.POST("/create", pokemonHandler.StorePokemon)
 }

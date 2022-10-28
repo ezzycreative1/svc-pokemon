@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -17,26 +16,29 @@ import (
 )
 
 type PokemonHandler struct {
-	UseCaseRoles ports.IRolesUsecase
-	UseCaseUsers ports.IUsersUsecase
-	Validator    mvalidator.Validator
-	Logger       mlog.Logger
-	Cfg          config.Group
+	UseCaseRoles    ports.IRolesUsecase
+	UseCaseUsers    ports.IUsersUsecase
+	UseCasePokemons ports.IPokemonsUsecase
+	Validator       mvalidator.Validator
+	Logger          mlog.Logger
+	Cfg             config.Group
 }
 
 func NewPokemonHandler(
 	usecaseRoles ports.IRolesUsecase,
 	usecaseUsers ports.IUsersUsecase,
+	usecasePokemons ports.IPokemonsUsecase,
 	validator mvalidator.Validator,
 	logger mlog.Logger,
 	config config.Group,
 ) PokemonHandler {
 	return PokemonHandler{
-		UseCaseRoles: usecaseRoles,
-		UseCaseUsers: usecaseUsers,
-		Validator:    validator,
-		Logger:       logger,
-		Cfg:          config,
+		UseCaseRoles:    usecaseRoles,
+		UseCaseUsers:    usecaseUsers,
+		UseCasePokemons: usecasePokemons,
+		Validator:       validator,
+		Logger:          logger,
+		Cfg:             config,
 	}
 }
 
@@ -80,7 +82,6 @@ func (ch *PokemonHandler) StoreRole(ctx echo.Context) (err error) {
 	userCtx := mid.SetIDx(ctx.Request().Context(), requestID)
 
 	var payload domain.RoleRequest
-	fmt.Println(payload)
 	if err := ctx.Bind(&payload); err != nil {
 		ch.Logger.ErrorT(requestID, "role store payload", err, mlog.Any("payload", payload))
 		return web.ResponseFormatter(ctx, http.StatusBadRequest, "Bad Request", nil, err)
@@ -292,4 +293,42 @@ func (ch *PokemonHandler) DeleteUser(c echo.Context) error {
 	}
 
 	return web.ResponseFormatter(c, http.StatusNoContent, "success", "", nil)
+}
+
+func (ch *PokemonHandler) StorePokemon(ctx echo.Context) (err error) {
+	requestID := mid.GetID(ctx)
+	userCtx := mid.SetIDx(ctx.Request().Context(), requestID)
+
+	var payload domain.StorePokemonRequest
+	if err := ctx.Bind(&payload); err != nil {
+		ch.Logger.ErrorT(requestID, "role store payload", err, mlog.Any("payload", payload))
+		return web.ResponseFormatter(ctx, http.StatusBadRequest, "Bad Request", nil, err)
+	}
+
+	mapErr, err := ch.Validator.Struct(payload)
+	if err != nil {
+		ch.Logger.ErrorT(requestID, "Bad Request", err)
+		return web.ResponseErrValidation(ctx, "bad request", mapErr)
+	}
+
+	err = ch.UseCasePokemons.StorePokemon(userCtx, &payload)
+	if err != nil {
+		ch.Logger.ErrorT(requestID, "error store data", err)
+		return web.ResponseFormatter(ctx, http.StatusBadRequest, err.Error(), nil, err)
+	}
+
+	return web.ResponseFormatter(ctx, http.StatusOK, "Success", "", nil)
+}
+
+func (ch *PokemonHandler) FetchPokemons(ctx echo.Context) error {
+	requestID := mid.GetID(ctx)
+	userCtx := mid.SetIDx(ctx.Request().Context(), requestID)
+
+	listAr, err := ch.UseCasePokemons.FetchPokemons(userCtx)
+	if err != nil {
+		ch.Logger.ErrorT(requestID, "error fetch data", err)
+		return web.ResponseFormatter(ctx, http.StatusBadRequest, err.Error(), nil, err)
+	}
+
+	return web.ResponseFormatter(ctx, http.StatusOK, "Success", listAr, nil)
 }
