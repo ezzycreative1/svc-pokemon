@@ -27,9 +27,14 @@ type IUsersRepository interface {
 type IPokemonsRepository interface {
 	FetchPokemons(ctx context.Context) ([]domain.Pokemons, error)
 	// GetPokemonByID(ctx context.Context, id int64) (*domain.Pokemons, error)
-	// UpdatePokemon(ctx context.Context, input *domain.Pokemons) error
-	StorePokemon(ctx context.Context, input *domain.StorePokemonRequest) error
+	UpdatePokemon(ctx context.Context, input *domain.Pokemons) error
+	StorePokemon(ctx context.Context, input *domain.Pokemons) error
+	CheckExistsPokemon(ctx context.Context, name string) bool
 	// DeletePokemon(ctx context.Context, id int64) error
+}
+
+type IPokemonExternalRepository interface {
+	GetPokemonByName(ctx context.Context, name string) (*domain.PokemonExternal, error)
 }
 
 type IBattleRepository interface {

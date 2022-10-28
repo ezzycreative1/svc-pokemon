@@ -2,11 +2,7 @@ package mysql
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
+	"errors"
 	"time"
 
 	domain "github.com/ezzycreative1/svc-pokemon/internal/core/domain"
@@ -32,18 +28,6 @@ func NewMysqlPokemonRepo(db *gorm.DB) mysqlPokemonRepo {
 }
 
 func (pr *mysqlPokemonRepo) FetchPokemons(ctx context.Context) ([]domain.Pokemons, error) {
-	resp, err := http.Get("https://pokeapi.co/api/v2/pokemon")
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	defer resp.Body.Close()
-	bodyBytes, _ := ioutil.ReadAll(resp.Body)
-
-	// Convert response body to string
-	bodyString := string(bodyBytes)
-	fmt.Println(bodyString)
-
 	ctxWT, cancel := context.WithTimeout(ctx, conTimeout*time.Second)
 	defer cancel()
 
@@ -56,31 +40,7 @@ func (pr *mysqlPokemonRepo) FetchPokemons(ctx context.Context) ([]domain.Pokemon
 	return res, nil
 }
 
-func (pr *mysqlPokemonRepo) StorePokemon(ctx context.Context, input *domain.StorePokemonRequest) error {
-	resp, err := http.Get("https://pokeapi.co/api/v2/pokemon")
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	defer resp.Body.Close()
-	bodyBytes, _ := ioutil.ReadAll(resp.Body)
-
-	// Convert response body to string
-	bodyString := string(bodyBytes)
-	fmt.Println(bodyString)
-
-	var dataPoke domain.PokemonExternal
-	json.Unmarshal(bodyBytes, &dataPoke)
-	fmt.Printf("API Response as struct %+v\n", dataPoke)
-
-	data := domain.Pokemons{
-		Name:      dataPoke.Name,
-		UserID:    input.UserID,
-		Stock:     input.Stock,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-
+func (pr *mysqlPokemonRepo) StorePokemon(ctx context.Context, input *domain.Pokemons) error {
 	trx, ok := ctx.Value(KeyTransaction).(*gorm.DB)
 	if !ok {
 		trx = pr.DB
@@ -89,10 +49,45 @@ func (pr *mysqlPokemonRepo) StorePokemon(ctx context.Context, input *domain.Stor
 	ctxWT, cancel := context.WithTimeout(ctx, connectTimeout*time.Second)
 	defer cancel()
 
-	query := trx.WithContext(ctxWT).Create(&data)
+	query := trx.WithContext(ctxWT).Create(&input)
 	if query.Error != nil {
 		return query.Error
 	}
 
 	return nil
+}
+
+func (pr *mysqlPokemonRepo) UpdatePokemon(ctx context.Context, input *domain.Pokemons) error {
+	trx, ok := ctx.Value(KeyTransaction).(*gorm.DB)
+	if !ok {
+		trx = pr.DB
+	}
+
+	if input.ID == 0 {
+		return errors.New("pokemon to update must have id")
+	}
+
+	ctxWT, cancel := context.WithTimeout(ctx, connectTimeout*time.Second)
+	defer cancel()
+
+	query := trx.WithContext(ctxWT).Save(&input)
+	if query.Error != nil {
+		return query.Error
+	}
+
+	return nil
+}
+
+func (pr *mysqlPokemonRepo) CheckExistsPokemon(ctx context.Context, name string) bool {
+	ctxWT, cancel := context.WithTimeout(ctx, connectTimeout*time.Second)
+	defer cancel()
+
+	var exists bool
+	if query := pr.DB.WithContext(ctxWT).Select("count(id) > 0").
+		Where("name = ?", name).
+		Find(&exists); query.Error != nil {
+		return false
+	}
+
+	return true
 }

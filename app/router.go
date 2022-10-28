@@ -7,6 +7,7 @@ import (
 	"github.com/ezzycreative1/svc-pokemon/pkg/web"
 
 	"github.com/ezzycreative1/svc-pokemon/internal/core/usecase"
+	"github.com/ezzycreative1/svc-pokemon/internal/repository/external"
 	"github.com/ezzycreative1/svc-pokemon/internal/repository/mysql"
 	"github.com/labstack/echo/v4"
 )
@@ -16,6 +17,7 @@ func LoadRoute(app *app) {
 	roleRepos := mysql.NewMysqlRolesRepo(app.database)
 	userRepos := mysql.NewMysqlUserRepo(app.database)
 	pokeRepos := mysql.NewMysqlPokemonRepo(app.database)
+	pokeExternalRepos := external.NewExternalPokeRepo()
 	roleUCase := usecase.NewRolesUsecase(
 		&roleRepos,
 	)
@@ -24,6 +26,7 @@ func LoadRoute(app *app) {
 	)
 	pokemonUCase := usecase.NewPokemonUsecase(
 		&pokeRepos,
+		&pokeExternalRepos,
 	)
 	// create handler
 	pokemonHandler := handler.NewPokemonHandler(
