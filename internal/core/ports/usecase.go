@@ -37,6 +37,14 @@ type IPokemonsUsecase interface {
 	// DeletePokemon(ctx context.Context, id int64) error
 }
 
+type IPokemonTypeUsecase interface {
+	FetchPokemonTypes(ctx context.Context) ([]domain.PokemonTypes, error)
+	// GetPokemonByID(ctx context.Context, id int64) (*domain.Pokemons, error)
+	// UpdatePokemon(ctx context.Context, input *domain.Pokemons) error
+	StorePokemonType(context.Context, *domain.StorePokemonRequest) error
+	// DeletePokemon(ctx context.Context, id int64) error
+}
+
 type IBattlesUsecase interface {
 	FetchBatlles(ctx context.Context) ([]domain.Battles, error)
 	GetBattleByID(ctx context.Context, id int64) (*domain.Battles, error)

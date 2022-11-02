@@ -33,8 +33,18 @@ type IPokemonsRepository interface {
 	// DeletePokemon(ctx context.Context, id int64) error
 }
 
+type IPokemonTypeRepository interface {
+	FetchPokemonTypes(ctx context.Context) ([]domain.PokemonTypes, error)
+	// GetPokemonByID(ctx context.Context, id int64) (*domain.Pokemons, error)
+	UpdatePokemonType(ctx context.Context, input *domain.PokemonTypes) error
+	StorePokemonType(ctx context.Context, input *domain.PokemonTypes) error
+}
+
 type IPokemonExternalRepository interface {
 	GetPokemonByName(ctx context.Context, name string) (*domain.PokemonExternal, error)
+}
+type IPokemonTypeExternalRepository interface {
+	GetPokemonType(ctx context.Context) (*domain.Type, error)
 }
 
 type IBattleRepository interface {

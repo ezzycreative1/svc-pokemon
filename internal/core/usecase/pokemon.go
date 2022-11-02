@@ -45,10 +45,11 @@ func (p *pokemonUseCase) StorePokemon(ctx context.Context, input *domain.StorePo
 	if err != nil {
 		return err
 	}
-
 	data := &domain.Pokemons{
-		Name: dataPokemon.Name,
-		//UserID:    input.UserID,
+		TypeID:    0,
+		Name:      dataPokemon.Name,
+		Height:    int64(dataPokemon.Height),
+		Weight:    int64(dataPokemon.Weight),
 		Stock:     input.Stock,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
