@@ -1,6 +1,8 @@
 package config
 
-import "strings"
+import (
+	"strings"
+)
 
 // in mem package variable
 var env = "dev"
@@ -68,4 +70,15 @@ type Redis struct {
 
 type PokemonConfig struct {
 	HTTPPort int `json:"http_port,omitempty"`
+}
+
+type PokemonAuth struct {
+	AccessTokenPrivateKey  string `json:"access_token_private_key,omitempty"`
+	AccessTokenPublicKey   string `json:"access_token_public_key,omitempty"`
+	AccessTokenExpiresIn   string `json:"access_token_expires_in,omitempty"`
+	AccessTokenMaxAge      string `json:"access_token_maxage,omitempty"`
+	RefreshTokenPrivateKey string `json:"refresh_token_private_key,omitempty"`
+	RefreshTokenPublicKey  string `json:"refresh_token_public_key,omitempty"`
+	RefreshTokenExpiresIn  string `json:"refresh_token_expires_in,omitempty"`
+	RefreshTokenMaxAge     string `json:"refresh_token_maxage,omitempty"`
 }

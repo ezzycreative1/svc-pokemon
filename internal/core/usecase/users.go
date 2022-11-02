@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/ezzycreative1/svc-pokemon/config"
 	"github.com/ezzycreative1/svc-pokemon/internal/core/domain"
 	"github.com/ezzycreative1/svc-pokemon/internal/core/ports"
 	"github.com/ezzycreative1/svc-pokemon/pkg/errs"
@@ -38,17 +39,41 @@ func (ru *userUseCase) LoginUser(ctx context.Context, input *domain.LoginRequest
 		return nil, errs.ErrBadParamInput
 	}
 
-	getToken, err := mid.GenerateToken(user.Email, user.ID)
+	//getToken, err := mid.GenerateToken(user.Email, user.ID)
+	// if err != nil {
+	// 	return nil, errs.ErrGenerateToken
+	// }
+
+	config := config.LoadConfig()
+
+	// Generate Tokens
+	timeDurationAccessToken, _ := time.ParseDuration("15m")
+	timeDurationRefreshToken, _ := time.ParseDuration("60m")
+	access_token, err := mid.CreateToken(timeDurationAccessToken, user.ID, config.PokemonAuth.AccessTokenPrivateKey)
 	if err != nil {
-		return nil, errs.ErrGenerateToken
+		return nil, errs.ErrBadRequest
 	}
+
+	refresh_token, err := mid.CreateToken(timeDurationRefreshToken, user.ID, config.PokemonAuth.RefreshTokenPrivateKey)
+	if err != nil {
+		return nil, errs.ErrBadRequest
+	}
+
+	// ctx.SetCookie("access_token", access_token, config.AccessTokenMaxAge*60, "/", "localhost", false, true)
+	// ctx.SetCookie("refresh_token", refresh_token, config.RefreshTokenMaxAge*60, "/", "localhost", false, true)
+	// ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, false)
 	//res.Token = getToken
 
 	res := &domain.LoginResponse{
-		Token: getToken,
+		AccessToken:  access_token,
+		RefreshToken: refresh_token,
 	}
 
 	return res, nil
+}
+
+func (ru *userUseCase) LogoutUser(ctx context.Context) error {
+	return nil
 }
 
 func (ru *userUseCase) FetchUsers(ctx context.Context) ([]domain.UserResponse, error) {
@@ -60,10 +85,10 @@ func (ru *userUseCase) FetchUsers(ctx context.Context) ([]domain.UserResponse, e
 	var res []domain.UserResponse
 	for _, user := range listUser {
 		res = append(res, domain.UserResponse{
-			ID:     user.ID,
-			Name:   user.Name,
-			Email:  user.Email,
-			Status: user.Status,
+			ID:       user.ID,
+			FullName: user.FullName,
+			Email:    user.Email,
+			IsActive: user.IsActive,
 		})
 	}
 	return res, nil
@@ -77,9 +102,9 @@ func (ru *userUseCase) GetUserByID(ctx context.Context, id int64) (*domain.Singl
 	res := domain.SingleUserResponse{
 		ID:        dataUser.ID,
 		Role:      dataUser.RoleID,
-		Name:      dataUser.Name,
+		FullName:  dataUser.FullName,
 		Email:     dataUser.Email,
-		Status:    dataUser.Status,
+		IsActive:  dataUser.IsActive,
 		CreatedAt: dataUser.CreatedAt,
 		UpdatedAt: dataUser.UpdatedAt,
 	}
@@ -95,10 +120,10 @@ func (ru *userUseCase) UpdateUser(ctx context.Context, id int64, input *domain.U
 	data := domain.Users{
 		ID:        dataUser.ID,
 		RoleID:    input.Role,
-		Name:      input.Fullname,
+		FullName:  input.Fullname,
 		Email:     input.Email,
 		Password:  dataUser.Password,
-		Status:    dataUser.Status,
+		IsActive:  dataUser.IsActive,
 		CreatedAt: dataUser.CreatedAt,
 		UpdatedAt: time.Now(),
 	}
@@ -107,14 +132,18 @@ func (ru *userUseCase) UpdateUser(ctx context.Context, id int64, input *domain.U
 }
 
 func (ru *userUseCase) StoreUser(ctx context.Context, input *domain.StoreUserRequest) error {
+	if input.Password != input.PasswordConfirm {
+		return errs.ErrPasswordNotMatch
+	}
+
 	password, _ := mid.HashPassword(input.Password)
 
 	data := domain.Users{
 		RoleID:    input.Role,
-		Name:      input.Fullname,
+		FullName:  input.Fullname,
 		Email:     input.Email,
 		Password:  password,
-		Status:    1,
+		IsActive:  1,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

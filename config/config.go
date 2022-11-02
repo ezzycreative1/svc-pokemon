@@ -8,10 +8,11 @@ import (
 )
 
 type Group struct {
-	Server   Server        `json:"server,omitempty"`
-	Database Database      `json:"database,omitempty"`
-	Redis    Redis         `json:"redis,omitempty"`
-	Pokemon  PokemonConfig `json:"pokemon,omitempty"`
+	Server      Server        `json:"server,omitempty"`
+	Database    Database      `json:"database,omitempty"`
+	Redis       Redis         `json:"redis,omitempty"`
+	Pokemon     PokemonConfig `json:"pokemon,omitempty"`
+	PokemonAuth PokemonAuth   `json:"PokemonAuth,omitempty"`
 }
 
 type Server struct {
@@ -52,6 +53,17 @@ func LoadConfig() *Group {
 			Password: envar.GetEnv("REDIS_PASSWORD", ""),
 			DB:       envar.GetEnv("REDIS_DB", 4),
 			UseTLS:   envar.GetEnv("REDIS_USE_TLS", false),
+		},
+		PokemonAuth: PokemonAuth{
+			AccessTokenPrivateKey: envar.GetEnv("ACCESS_TOKEN_PRIVATE_KEY", ""),
+			AccessTokenPublicKey:  envar.GetEnv("ACCESS_TOKEN_PUBLIC_KEY", ""),
+			AccessTokenExpiresIn:  envar.GetEnv("ACCESS_TOKEN_EXPIRED_IN", "15m"),
+			AccessTokenMaxAge:     envar.GetEnv("ACCESS_TOKEN_MAXAGE", "15"),
+
+			RefreshTokenPrivateKey: envar.GetEnv("ACCESS_TOKEN_PRIVATE_KEY", ""),
+			RefreshTokenPublicKey:  envar.GetEnv("ACCESS_TOKEN_PRIVATE_KEY", ""),
+			RefreshTokenExpiresIn:  envar.GetEnv("ACCESS_TOKEN_PRIVATE_KEY", "60m"),
+			RefreshTokenMaxAge:     envar.GetEnv("ACCESS_TOKEN_PRIVATE_KEY", "60"),
 		},
 	}
 }

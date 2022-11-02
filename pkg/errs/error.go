@@ -10,4 +10,6 @@ var (
 	ErrDuplicate           = errors.New("duplicated entry")
 	ErrEmailWrong          = errors.New("format email wrong")
 	ErrGenerateToken       = errors.New("generate token failed")
+	ErrPasswordNotMatch    = errors.New("password not match")
+	ErrBadRequest          = errors.New("bad request")
 )

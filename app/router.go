@@ -55,7 +55,7 @@ func LoadRoute(app *app) {
 	g.GET("/role/:id", pokemonHandler.GetRoleByID)
 	g.DELETE("/role/:id", pokemonHandler.DeleteRole)
 	//router user
-	g.POST("/user", pokemonHandler.StoreUser)
+	g.POST("/user", pokemonHandler.Register)
 	g.GET("/users", pokemonHandler.FetchUsers)
 	g.PUT("/user/:id", pokemonHandler.UpdateUser)
 	g.GET("/user/:id", pokemonHandler.GetUserByID)

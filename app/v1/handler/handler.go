@@ -216,13 +216,13 @@ func (ch *PokemonHandler) GetUserByID(ctx echo.Context) error {
 	return web.ResponseFormatter(ctx, http.StatusOK, "success", art, nil)
 }
 
-func (ch *PokemonHandler) StoreUser(ctx echo.Context) (err error) {
+func (ch *PokemonHandler) Register(ctx echo.Context) (err error) {
 	requestID := mid.GetID(ctx)
 	userCtx := mid.SetIDx(ctx.Request().Context(), requestID)
 
 	var payload domain.StoreUserRequest
 	if err := ctx.Bind(&payload); err != nil {
-		ch.Logger.ErrorT(requestID, "user store payload", err, mlog.Any("payload", payload))
+		ch.Logger.ErrorT(requestID, "register user payload", err, mlog.Any("payload", payload))
 		return web.ResponseFormatter(ctx, http.StatusBadRequest, "Bad Request", nil, err)
 	}
 

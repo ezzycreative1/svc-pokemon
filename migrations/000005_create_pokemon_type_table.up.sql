@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS `Pokemon_types` (
+`id` bigint NOT NULL AUTO_INCREMENT,
+`name`varchar(30) NOT NULL DEFAULT 0,
+`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+`updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+PRIMARY KEY (`id`),
+KEY `idx_type_id` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;

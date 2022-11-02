@@ -29,9 +29,9 @@ func (p *pokemonUseCase) FetchPokemons(ctx context.Context) ([]domain.Pokemons, 
 	var res []domain.Pokemons
 	for _, poke := range listPokemon {
 		res = append(res, domain.Pokemons{
-			ID:        poke.ID,
-			Name:      poke.Name,
-			UserID:    poke.UserID,
+			ID:   poke.ID,
+			Name: poke.Name,
+			//UserID:    poke.UserID,
 			Stock:     poke.Stock,
 			CreatedAt: poke.CreatedAt,
 			UpdatedAt: poke.UpdatedAt,
@@ -47,16 +47,16 @@ func (p *pokemonUseCase) StorePokemon(ctx context.Context, input *domain.StorePo
 	}
 
 	data := &domain.Pokemons{
-		Name:      dataPokemon.Name,
-		UserID:    input.UserID,
+		Name: dataPokemon.Name,
+		//UserID:    input.UserID,
 		Stock:     input.Stock,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 
-	if (p.Repo.CheckExistsPokemon(ctx, input.Name) {
-		
-	}
+	// if (p.Repo.CheckExistsPokemon(ctx, input.Name) {
+
+	// }
 
 	if err := p.Repo.StorePokemon(ctx, data); err != nil {
 		return err

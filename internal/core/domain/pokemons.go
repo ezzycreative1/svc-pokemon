@@ -12,8 +12,10 @@ type StorePokemonRequest struct {
 
 type Pokemons struct {
 	ID        int64     `json:"id" gorm:"primaryKey;autoIncrement"`
+	TypeID    int64     `json:"type_id"`
 	Name      string    `json:"name" validate:"required"`
-	UserID    int64     `json:"user_id"`
+	Height    int64     `json:"height" validate:"required"`
+	Weight    int64     `json:"weight" validate:"required"`
 	Stock     int64     `json:"stock" validate:"required"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -23,11 +25,13 @@ func (Pokemons) TableName() string {
 	return "Pokemon"
 }
 
-func NewPokemons(id int64, name string, userID int64, stock int64) *Pokemons {
+func NewPokemons(id int64, typeID int64, name string, height int64, weight int64, stock int64) *Pokemons {
 	return &Pokemons{
 		ID:        id,
+		TypeID:    typeID,
 		Name:      name,
-		UserID:    userID,
+		Height:    height,
+		Weight:    weight,
 		Stock:     stock,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),

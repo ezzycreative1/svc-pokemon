@@ -3,6 +3,7 @@ package mysql
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	domain "github.com/ezzycreative1/svc-pokemon/internal/core/domain"
@@ -69,6 +70,7 @@ func (cr *mysqlUsersRepo) GetUserByID(ctx context.Context, id int64) (*domain.Us
 }
 
 func (cr *mysqlUsersRepo) StoreUser(ctx context.Context, input *domain.Users) error {
+	fmt.Println(input)
 	trx, ok := ctx.Value(KeyTransaction).(*gorm.DB)
 	if !ok {
 		trx = cr.DB

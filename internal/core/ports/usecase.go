@@ -26,6 +26,7 @@ type IUsersUsecase interface {
 	StoreUser(context.Context, *domain.StoreUserRequest) error
 	DeleteUser(ctx context.Context, id int64) error
 	LoginUser(context.Context, *domain.LoginRequest) (*domain.LoginResponse, error)
+	LogoutUser(context.Context) error
 }
 
 type IPokemonsUsecase interface {

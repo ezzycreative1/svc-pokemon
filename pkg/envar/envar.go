@@ -5,10 +5,11 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type typ interface {
-	int | bool | string
+	int | bool | string | time.Duration
 }
 
 func GetEnv[T typ](key string, def T) T {
